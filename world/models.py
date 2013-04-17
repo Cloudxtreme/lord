@@ -31,7 +31,7 @@ class WorldMap(DatesMixin):
         return self.name
         
     def map_editor_url(self):
-        return "<a href='{url}' target='_blank'>edit</a>".format(url=reverse("world_map_editor", kwargs={ "world_map_id": self.id }))
+        return "<a href='{url}' target='_blank'>edit</a>".format(url=reverse("world_map_edit", kwargs={ "world_map_id": self.id }))
     map_editor_url.allow_tags = True
         
     def full_map_layout(self):
