@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load map_tags %}
+{% load static from staticfiles %}
+
+{% block extra_head %}{{ block.super }}
+	{% include '_includes/map_style.html' %}
+	<style>
+		.td1 { width: 50px; }
+	</style>
+{% endblock %}
+
+{% block page_title %}{{ world_map.name }}{% endblock %}
+{% block content %}
+	<div class="map">
+		{% if request.user.is_superuser %}<p><a href="{% url 'world_map_edit' world_map_id=world_map.pk %}">edit map</a></p>{% endif %}
+		{% spaceless %}
+		{% for y in world_map.full_map_layout %}
+			{% for x in y %}
+				{% if x %}
+					{% if x == request.user.map_square %}
+						<a href="#" class="{{ x.terrain.name|slugify }} player"> & </a>
+					{% else %}
+						<a href="#" class="{{ x.terrain.name|slugify }}"> {{ x.terrain.character }} </a>
+					{% endif %}
+				{% else %}
+					<a href="#" class="unpassable"> X </a>
+				{% endif %}
+			{% endfor %}<br/>
+		{% endfor %}
+		{% endspaceless %}
+	</div>
+	<div class="moves">
+		From here it is 
+		{% for direction, map_square in request.user.map_square.get_possible_moves.iteritems %}
+			{% if map_square %}
+				{% if forloop.last %}
+					and {{ map_square.terrain|lower }} to the {{ direction|direction_name }}{% if forloop.last %}.{% else %},{% endif %}
+				{% else %}
+					{{ map_square.terrain|lower }} to the {{ direction|direction_name }},
+				{% endif %}
+			{% endif %}
+		{% endfor %}
+		<form id="direction_form" action="{% url 'players_move_player' %}" method="POST">{% csrf_token %}
+			<input type="hidden" id="direction" name="direction" value="">
+		</form>
+	</div>
+	<div class="other_players">
+		{% if request.user.map_square.player_set.all.count > 1 %}
+			You see {{ request.user.map_square.player_set.all.count|pluralize:"an," }}other adventurer{{ request.user.map_square.player_set.all.count|pluralize:"s" }} nearby...<br/>
+			{% for player in request.user.map_square.player_set.all %}
+				{% if player.id != request.user.id %}
+					<a href="#{{ player.handle|slugify }}" role="button" data-toggle="modal">{{ player.handle }}</a><br/>
+					
+					<div id="{{ player.handle|slugify }}" class="modal hide fade">
+					  <div class="modal-header">
+					    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					    <h3>{{ player.handle }}</h3>
+					  </div>
+					  <div class="modal-body">
+					    <table class="table table-hover">
+							<tr>
+								<td class="td1">Status:</td>
+								<td>{{ player.status }}</td>
+							</tr>
+							<tr>
+								<td>Level:</td>
+								<td>{{ player.level }}</td>
+							</tr>
+							<tr>
+								<td>HP:</td>
+								<td>{% with player.get_hp_status as hp_status %}
+									<div class="progress progress-{{ hp_status.0 }} progress-striped">
+									  <div class="bar" style="width: {{ hp_status.1 }}%"></div>
+									</div>
+								</td>{% endwith %}
+							</tr>
+						</table>
+					  </div>
+					  <div class="modal-footer">
+						<form action="{% url 'players_attack_player' %}" method="POST">{% csrf_token %}
+							<input type="hidden" name="player_id" value="{{ player.pk }}" />
+					    	<a href="#" data-dismiss="modal" class="btn">Close</a>
+					    	<button type="submit" class="btn btn-danger">Attack</button>
+					    </form>
+					  </div>
+					</div>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+	</div>
+{% endblock %}
+
+{% block extra_javascript %}{{ block.super }}
+	<script type="text/javascript" src="{% static 'js/map.js' %}"></script>
+{% endblock %}

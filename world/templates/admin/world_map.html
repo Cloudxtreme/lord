@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}World Editor: {{ world_map.name }}{% endblock %}
+{% block extra_head %}
+	{% include '_includes/map_style.html' %}
+{% endblock %}
+
+{% block page_title %}{{ world_map.name }}{% endblock %}
+{% block content %}
+	<div class="map">
+		{% for y in world_map.full_map_layout %}
+			{% for x in y %}
+				{% if x %}
+					<a href="{% url "admin:world_mapsquare_change" x.id %}" target="_blank" class="{{ x.terrain.name|slugify }}" title="({{ forloop.counter0 }},{{ forloop.parentloop.counter0 }}): bat={{ x.battle_odds }} saf={{ x.safe }}"> {{ x.terrain.character }} </a>
+				{% else %}
+					<a href="{% url "admin:world_mapsquare_add" %}?world_map={{ world_map.pk }}&x={{ forloop.counter0 }}&y={{ forloop.parentloop.counter0 }}" target="_blank"> X </a>
+				{% endif %}
+			{% endfor %}<br/>
+		{% endfor %}
+	</div>
+{% endblock %}

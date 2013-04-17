@@ -1,0 +1,13 @@
+<style>
+	{% for t in terrain %}
+	a.{{ t.name|slugify }} {
+		color: #{{ t.fg_color }};
+		background-color: #{{ t.bg_color }};
+		font-size: 32px;
+		line-height:32px;
+	}
+	{% endfor %}
+	a.player {
+		color: yellow !important;
+	}
+</style>
