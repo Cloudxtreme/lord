@@ -162,6 +162,12 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
         return ('info', percent_fights_remaining)
     
     def attack_player(self, defender):
+        if self.map_square.safe:
+            raise InvalidAttackException('This is a no-fight zone. You can only fight monsters here.')
+        
+        if defender.map_square != self.map_square:
+            raise InvalidAttackException('{defender} seems to have slipped away before you had a chance to attack.'.format(defender=defender.handle))
+        
         if self.dead:
             raise PlayerDeadException('You are dead.  You cannot attack.')
             

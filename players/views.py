@@ -40,21 +40,18 @@ def move_player(request):
 @login_required
 def attack_player(request):
     return_url = reverse('world_map_main', args=(request.user.world_map.pk,))
-    if request.user.map_square.safe:
-        messages.error(request, 'This is a no-fight zone. You can only fight monsters here.')
-    else:
-        player = Player.objects.get(map_square=request.user.map_square, id=request.POST['player_id'])
-        
-        try:
-            fight_description = request.user.attack_player(player)
-            if request.user.dead:
-                messages.error(request, fight_description)
-            else:
-                messages.info(request, fight_description)
-        except InvalidAttackException as e:
-            messages.error(request, e)
-        except PlayerDeadException as e:
-            messages.error(request, e)
+    
+    player = Player.objects.get(id=request.POST['player_id'])
+    try:
+        fight_description = request.user.attack_player(player)
+        if request.user.dead:
+            messages.error(request, fight_description)
+        else:
+            messages.info(request, fight_description)
+    except InvalidAttackException as e:
+        messages.error(request, e)
+    except PlayerDeadException as e:
+        messages.error(request, e)
         
     return redirect(return_url)
     
