@@ -5,9 +5,7 @@ from django.utils.timezone import now
 from game.models import *
 from world.models import *
 
-from random import choice
-
-import datetime
+import datetime, random
 
 class InvalidAttackException(Exception):
     pass
@@ -86,8 +84,8 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
     # Vitals
     dead = models.BooleanField(default=False)
     inn = models.BooleanField(default=False) # sleeping at inn?
-    hit_points = models.IntegerField(default=50)
-    hit_points_max = models.IntegerField(default=50)
+    hit_points = models.IntegerField(default=10)
+    hit_points_max = models.IntegerField(default=10)
     defense = models.IntegerField(default=10)
     strength = models.IntegerField(default=10)
     charm = models.IntegerField(default=10)
@@ -190,7 +188,8 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
             50% of the time, use skill selection.
             25% of the time, attacker gets the first attack.
             25% of the time, defender gets the first attack."""
-        first_attacker = choice(['me','them','skill','skill'])
+        random.seed()
+        first_attacker = random.choice(['me','them','skill','skill'])
         if first_attacker == 'me' or (first_attacker == 'skill' and self.strength > defender.strength): # you fight first.
             fight_description += "You get the jump on {defender} and attack first!\n".format(defender=defender.handle)
             damage = self.deal_damage(defender)
@@ -260,7 +259,9 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
         return fight_description
     
     def deal_damage(self, defender):
-        damage = choice(range(max(0, (5*(self.strength+self.equipped_weapon.strength))-(4*(defender.defense+defender.equipped_armor.defense)))))
+        random.seed()
+        damage = max(0,(((self.strength + self.equipped_weapon.strength) / 2) + random.randint(0, (self.strength + self.equipped_weapon.strength) / 2)) - (defender.defense + defender.equipped_armor.defense)) # actual LORD math
+        #damage = choice(range(max(0, (5*(self.strength+self.equipped_weapon.strength))-(4*(defender.defense+defender.equipped_armor.defense))))) # my original faked math
         defender.hit_points -= damage
         if defender.hit_points <= 0:
             defender.dead = True
