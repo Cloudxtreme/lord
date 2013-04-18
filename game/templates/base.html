@@ -76,10 +76,21 @@
 					  <div class="bar" style="width: {{ human_fight_status.1 }}%">Human Fights Left: {{ request.user.human_fights_left }} / {{ request.user.MAX_HUMAN_FIGHTS }}</div>
 					</div>
 				{% endwith %}
+				
+				<h4>Progress</h4>
+				Status: <span class="status-{{ user.status|slugify }}">{{ user.status }}</span><br/>
 				Experience: {{ user.experience }}<br/>
 				Level: {{ user.level }}<br/>
+				
+				<h4>Inventory</h4>
 				Gold: {{ user.gold }}<br/>
 				Gems: {{ user.gem }}<br/>
+				Weapon: {{ user.equipped_weapon.name }} (+{{ user.equipped_weapon.strength }})<br/>
+				Armor: {{ user.equipped_armor.name }} (+{{ user.equipped_armor.defense }})<br/>
+				
+				<h4>Vitals</h4>
+				Strength: {{ user.strength }} +{{ user.equipped_weapon.strength }}<br/>
+				Defense: {{ user.defense }} +{{ user.equipped_armor.defense }}<br/>
 				
 			</div>
 	{% endif %}

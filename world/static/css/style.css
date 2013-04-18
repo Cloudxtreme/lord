@@ -62,3 +62,8 @@ code {
 .map a:active {
 	text-decoration: none;
 }
+
+.status-dead {
+	color: red;
+}
+}
