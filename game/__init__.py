@@ -1,5 +1,5 @@
 __author__ = 'Gabriel Harriman'
-__copyright__ = 'Copyright 2013, Gabriel Harriman'
+__copyright__ = '&copy; 2013, <a href="http://django-lord.github.io/lord/" target="_blank">django-lord</a>'
 __credits__ = ['Gabriel Harriman, mynameisgabe.com, @mynameisgabe']
 
 

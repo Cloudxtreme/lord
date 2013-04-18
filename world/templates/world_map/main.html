@@ -49,7 +49,7 @@
 			You see {{ request.user.map_square.active_players.count|pluralize:"an," }}other adventurer{{ request.user.map_square.active_players.count|pluralize:"s" }} nearby...<br/>
 			{% for player in request.user.map_square.active_players %}
 				{% if player.id != request.user.id %}
-					<a href="#{{ player.handle|slugify }}" role="button" data-toggle="modal">{{ player.handle }}</a><br/>
+					<a href="#{{ player.handle|slugify }}" role="button" data-toggle="modal">{{ player.handle }}</a>{% if not forloop.last %}, {% endif %}
 					
 					<div id="{{ player.handle|slugify }}" class="modal hide fade">
 					  <div class="modal-header">
@@ -88,6 +88,13 @@
 			{% endfor %}
 		{% endif %}
 	</div>
+	<hr/>
+	{% for activity in request.user.get_activity_log %}
+	<div class="activitylog alert alert-{% if activity.activity_type == 'pvp_attacker' or activity.activity_type == 'pvp_defender' %}error{% else %}info{% endif %}">
+		<strong>{{ activity.created_at|timesince }} ago...</strong>
+		{{ activity.message|linebreaks }}
+	</div>
+	{% endfor %}
 {% endblock %}
 
 {% block extra_javascript %}{{ block.super }}

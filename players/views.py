@@ -41,18 +41,27 @@ def move_player(request):
 def attack_player(request):
     return_url = reverse('world_map_main', args=(request.user.world_map.pk,))
     
-    player = Player.objects.get(id=request.POST['player_id'])
+    defender = Player.objects.get(id=request.POST['player_id'])
     try:
-        fight_description = request.user.attack_player(player)
-        if request.user.dead:
-            messages.error(request, fight_description)
-        else:
-            messages.info(request, fight_description)
-    except InvalidAttackException as e:
+        attacker_fight_description, defender_fight_description = request.user.attack_player(defender)
+        
+        # send a message to the attacker about the fight.
+        request.user.add_activity_log(
+            from_player=defender, 
+            activity_type="pvp_attacker",
+            message=attacker_fight_description
+        )
+        
+        # send a message to the defender about the fight.
+        defender.add_activity_log(
+            from_player=request.user, 
+            activity_type="pvp_defender",
+            message=defender_fight_description
+        )
+                
+    except InvalidAttackException as e: # Cannot attack.
         messages.error(request, e)
-    except PlayerDeadException as e:
+    except PlayerDeadException as e: # You are dead.
         messages.error(request, e)
         
     return redirect(return_url)
-    
-#django.contrib.auth.signals.user_logged_out

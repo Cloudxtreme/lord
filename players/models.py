@@ -132,7 +132,7 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
     map_square = models.ForeignKey(MapSquare, default=1)
     here_since = models.DateTimeField(auto_now_add=True, default=now)
     
-    # Internal Use
+    # Permissions
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     
@@ -152,6 +152,12 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
         if percent_hp_remaining < 20: return ('danger', percent_hp_remaining)
         if percent_hp_remaining < 50: return ('warning', percent_hp_remaining)
         return ('success', percent_hp_remaining)
+    
+    def get_activity_log(self):
+        if self.activitylog_to_player.all():
+            self.activitylog_to_player.filter(created_at__lt=(now()-datetime.timedelta(minutes=10)), viewed=True).delete() # purge messages that are older than 10 minutes and have already been seen.
+            self.activitylog_to_player.all().update(viewed=True)
+        return self.activitylog_to_player.all().order_by('-id')[:10]
         
     def get_fight_status(self):
         percent_fights_remaining = int((self.fights_left * 1.0 / self.MAX_FIGHTS) * 100)
@@ -160,6 +166,9 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
     def get_human_fight_status(self):
         percent_fights_remaining = int((self.human_fights_left * 1.0 / self.MAX_HUMAN_FIGHTS) * 100)
         return ('info', percent_fights_remaining)
+    
+    def add_activity_log(self, from_player, activity_type, message):
+        return ActivityLog.objects.create(to_player=self, from_player=from_player, activity_type=activity_type, message=message)
     
     def attack_player(self, defender):
         if self.map_square.safe:
@@ -189,7 +198,8 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
         # reset the online counter.
         self.here_since = now()
         
-        fight_description = ""
+        attacker_fight_description = ""
+        defender_fight_description = ""
         """ coin toss to see if defender attacking first:  
             50% of the time, use skill selection.
             25% of the time, attacker gets the first attack.
@@ -197,12 +207,17 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
         random.seed()
         first_attacker = random.choice(['me','them','skill','skill'])
         if first_attacker == 'me' or (first_attacker == 'skill' and self.strength > defender.strength): # you fight first.
-            fight_description += "You get the jump on {defender} and attack first!\n".format(defender=defender.handle)
+            
+            attacker_fight_description += "You get the jump on {defender} and attack first!\n".format(defender=defender.handle)
+            defender_fight_description += "{attacker} attacks you out of nowhere!\n".format(attacker=self.handle)
+            
             damage = self.deal_damage(defender)
             if damage == 0:
-                fight_description += "{defender} skillfully blocked your attack!\n".format(defender=defender.handle)
+                attacker_fight_description += "{defender} skillfully blocked your attack!\n".format(defender=defender.handle)
+                defender_fight_description += "You skillfully block {attacker}'s attack!\n".format(attacker=self.handle)
             elif defender.dead:
-                fight_description += "You hit {defender} with a deadly blow.  {defender} falls to the ground, spits a bit of blood and lets out one last breath before dieing. You loot {gold} gold coins and {gems} gems from the lifeless body.".format(defender=defender, gold=defender.gold, gems=defender.gem)
+                attacker_fight_description += "You hit {defender} with a deadly blow.  {defender} falls to the ground, spits a bit of blood and lets out one last breath before dieing. You loot {gold} gold coins and {gems} gems from the lifeless body.\n".format(defender=defender, gold=defender.gold, gems=defender.gem)
+                defender_fight_description += "{attacker} hits you with a deadly blow.  You fall to the ground and die as {attacker} loots your lifeless body.\n".format(attacker=self.handle)
                 self.gold += defender.gold
                 self.gem += defender.gem
                 self.experience += defender.experience
@@ -212,14 +227,17 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
                 defender.gold = defender.gem = 0
                 defender.save()
             else:
-                fight_description += "You hit {defender} with your {weapon} for {damage} damage.\n".format(defender=defender.handle, weapon=self.equipped_weapon.name, damage=damage)
+                attacker_fight_description += "You hit {defender} with your {weapon} for {damage} damage.\n".format(defender=defender.handle, weapon=self.equipped_weapon.name, damage=damage)
+                defender_fight_description += "{attacker} hits you with his {weapon} for {damage} damage.\n".format(attacker=self.handle, weapon=self.equipped_weapon.name, damage=damage)
 
             if not defender.dead: # defender fights back.
                 damage = defender.deal_damage(self)
                 if damage == 0:
-                    fight_description += "You skillfully block {defender}'s attack.\n".format(defender=defender.handle)
+                    attacker_fight_description += "You skillfully block {defender}'s attack.\n".format(defender=defender.handle)
+                    defender_fight_description += "{attacker} skillfully blocks your attack.\n".format(attacker=self.handle)
                 elif self.dead:
-                    fight_description += "{defender} attacks you with a deadly blow.  You die.  Your gold and gems have been taken.\n".format(defender=defender.handle)
+                    attacker_fight_description += "{defender} attacks you with a deadly blow.  You die.  Your gold and gems have been taken.\n".format(defender=defender.handle)
+                    defender_fight_description += "You hit {attacker} with a deadly blow.  He dies and you loot {gold} gold and {gem} gems from his lifeless body.\n".format(attacker=self.handle, gold=self.gold, gem=self.gem)
                     defender.gold += self.gold
                     defender.gem += self.gem
                     defender.experience += self.experience
@@ -228,14 +246,17 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
                     self.gold = self.gem = 0
                     self.save()
                 else:
-                    fight_description += "{defender} hits you with the {weapon} for {damage} damage.\n".format(defender=defender.handle, weapon=defender.equipped_weapon.name, damage=damage)
+                    attacker_fight_description += "{defender} hits you with the {weapon} for {damage} damage.\n".format(defender=defender.handle, weapon=defender.equipped_weapon.name, damage=damage)
+                    defender_fight_description += "You hit {attacker} with your {weapon} for {damage} damage.\n".format(attacker=self, weapon=defender.equipped_weapon.name, damage=damage)
         else: # They fight first.
-            fight_description += "{defender} gets the jump on you and attacks first!\n".format(defender=defender.handle)
+            attacker_fight_description += "{defender} gets the jump on you and attacks first!\n".format(defender=defender.handle)
+            defender_fight_description += "{attacker} tries to swing at you, but you beat him to it and attack first.\n".format(attacker=self.handle)
             damage = defender.deal_damage(self)
             if damage == 0:
-                fight_description += "You skillfully block {defender}'s attack.\n".format(defender=defender.handle)
+                attacker_fight_description += "You skillfully block {defender}'s attack.\n".format(defender=defender.handle)
             elif self.dead:
-                fight_description += "{defender} attacks you with a deadly blow.  You die.\n".format(defender=defender.handle)
+                attacker_fight_description += "{defender} attacks you with a deadly blow.  You die.\n".format(defender=defender.handle)
+                defender_fight_description += "You deal a deadly blow to {attacker}.  He dies and you loot his body.  You find {gold} gold and {gem} gems!\n".format(attacker=self.handle, gold=self.gold, gem=self.gem)
                 defender.gold += self.gold
                 defender.gem += self.gem
                 defender.experience += self.experience
@@ -244,14 +265,17 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
                 self.gold = self.gem = 0
                 self.save()
             else:
-                fight_description += "{defender} hits you with the {weapon} for {damage} damage.\n".format(defender=defender.handle, weapon=defender.equipped_weapon.name, damage=damage)
+                attacker_fight_description += "{defender} hits you with the {weapon} for {damage} damage.\n".format(defender=defender.handle, weapon=defender.equipped_weapon.name, damage=damage)
+                defender_fight_description += "You hit {attacker} with your {weapon} for {damage} damage.\n".format(attacker=self.handle, weapon=defender.equipped_weapon.name, damage=damage)
             
             if not self.dead: # you fight back.
                 damage = self.deal_damage(defender)
                 if damage == 0:
-                    fight_description += "{defender} skillfully blocked your attack!\n".format(defender=defender.handle)
+                    attacker_fight_description += "{defender} skillfully blocked your attack!\n".format(defender=defender.handle)
+                    defender_fight_description += "You skillfully block {attacker}'s attack!\n".format(attacker=self.handle)
                 elif defender.dead:
-                    fight_description += "You hit {defender} with a deadly blow.  {defender} falls to the ground, spits a bit of blood and lets out one last breath before dieing. You loot {gold} gold coins and {gems} gems from the lifeless body.".format(defender=defender.handle, gold=defender.gold, gems=defender.gem)
+                    attacker_fight_description += "You hit {defender} with a deadly blow.  {defender} falls to the ground, spits a bit of blood and lets out one last breath before dieing. You loot {gold} gold coins and {gems} gems from the lifeless body.\n".format(defender=defender.handle, gold=defender.gold, gems=defender.gem)
+                    defender_fight_description += "{attacker} hits you with a deadly blow. You fall to the ground, spit out a bit of blood and let out one last breath.  {attacker} loots your cold, lifeless body.\n".format(attacker=self.handle)
                     self.gold += defender.gold
                     self.gem += defender.gem
                     self.experience += defender.experience
@@ -261,8 +285,9 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
                     defender.gold = defender.gem = 0
                     defender.save()
                 else:
-                    fight_description += "You hit {defender} with your {weapon} for {damage} damage.\n".format(defender=defender.handle, weapon=self.equipped_weapon.name, damage=damage)
-        return fight_description
+                    attacker_fight_description += "You hit {defender} with your {weapon} for {damage} damage.\n".format(defender=defender.handle, weapon=self.equipped_weapon.name, damage=damage)
+                    defender_fight_description += "{attacker} hits you with his {weapon} for {damage} damage.\n".format(attacker=self.handle, weapon=self.equipped_weapon.name, damage=damage)
+        return attacker_fight_description, defender_fight_description
     
     def deal_damage(self, defender):
         random.seed()
@@ -330,10 +355,19 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
     def __unicode__(self):
         return self.handle
 
-class BattleLog(DatesMixin):
-    defender = models.ForeignKey('Player', related_name="defender")
-    attacker = models.ForeignKey('Player', related_name="attacker")
+class ActivityLog(DatesMixin):
+    """Use this model to push messages to any user as needed."""
+    ACTIVITY_TYPES = (
+        ('pvp_attacker', 'You attack'),
+        ('pvp_defender', 'You were attacked'),
+        ('event', 'An event occurred')
+    )
+    to_player = models.ForeignKey('Player', related_name='activitylog_to_player')
+    from_player = models.ForeignKey('Player', related_name='activitylog_from_player')
+    activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPES)
     message = models.TextField()
+    viewed = models.BooleanField(default=False)
+        
 
 class Armor(DatesMixin):
     name = models.CharField(max_length=50)

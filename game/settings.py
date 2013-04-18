@@ -1,6 +1,9 @@
-import os, sys
+import django.conf.global_settings as DEFAULT_SETTINGS
+
+import game, os, sys
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
-# Django settings for game project.
+
+VERSION = game.__version__
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
@@ -135,6 +138,10 @@ ROOT_URLCONF = 'game.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'game.wsgi.application'
+
+TEMPLATE_CONTEXT_PROCESSORS = DEFAULT_SETTINGS.TEMPLATE_CONTEXT_PROCESSORS + (
+    'game.context_processor.version',
+)
 
 TEMPLATE_DIRS = (
     os.path.join(SITE_ROOT, 'templates')
