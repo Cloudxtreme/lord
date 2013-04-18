@@ -8,7 +8,7 @@
 
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
-    <title>Lord</title>
+    <title>LORD</title>
   </head>
 
   <body>
@@ -35,20 +35,65 @@
 
 <p>We are building an open source clone of a classic BBS door game that we've named "Lord of the Red Dragon".</p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
+<h3>Concept</h3>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<p>We want to develop an engaging game platform that can be managed and extended by moderators and other developers.  Just as the original game allowed modules to be built, our LORD game will be extendable via an API.  We will also evaluate other platforms to plug into, such as facebook, ios and android apps.</p>
 
-<h3>Designer Templates</h3>
+<p>The initial core game will resemble the original BBS door game to start, will grow as the community sees fit.  The code repository can be forked from github, extended and then merged back into the trunk.  The master branch will always be playable at the <a href="http://lord.herokuapp.com/">lord.herokuapp.com</a></p>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<h3>How can you contribute?</h3>
 
-<h3>Rather Drive Stick?</h3>
+<h4><a href="#development">Development</a></h4>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<p>Want to get involved in programming?  We need developers with Python and Django experience, as well as frontend html/css/js ninjas.  To apply to be a regular contributor, simply choose an unassigned ticket from <a href="https://github.com/django-lord/lord/issues?state=open">github</a>, fork the <a href="https://github.com/django-lord/lord">LORD repository</a>, finish the ticket and submit a pull request.</p>
+
+<h4><a href="#design">Design</a></h4>
+
+<p>We're always looking for design suggestions and original asset and artwork contributions.</p>
+
+<h4><a href="#content">Content</a></h4>
+
+<p>We need cartographers, doctor frankensteins and blacksmiths...</p>
+
+<h4>Testing</h4>
+
+<p>Test out the game at <a href="http://lord.herokuapp.com/">lord.herokuapp.com</a> and submit tickets for bugs or enhancements on a href="https://github.com/django-lord/lord/issues?state=open">github</a>. 
+
+<h4>Administration/Moderation</h4>
+
+<p>Help keep our world clean and running smoothly.</p>
+
+<h3><a name="development"></a>Development</h3>
+
+<h4>Environment Setup</h4>
+
+Clone the repository and setup the environment:
+<pre><code>$ git clone https://github.com/django-lord/lord.git
+$ cd lord
+$ virtuanenv venv
+$ . venv/bin/activate
+$ pip install -r requirements.txt
+$ python manage.py syncdb
+$ python manage.py migrate</code></pre>
+
+<h4>Best Practices</h4>
+
+<p>All development is done in a fork or a milestone branch.  Branches are named as "v" + milestone.name.  milestone.name = target release date.</p>
+
+<p>Hotfixes should be branched from master and named "hotfix-[issue.id]"</p>
+
+<h3><a name="design"></a>Design</h3>
+
+<p>For now we use <a href="twitter.github.com/bootstrap/">twitter bootstrap</a> since we don't have a frontend dev on the team yet.</p>
+
+<h4><a name="content"></a>Content</h4>
+
+<p><strong>Maps:</strong> Design and create map layouts for new worlds. Suggestions for new map elements are welcome!</p>
+
+<p><strong>Monsters/Armor/Weapons:</strong> Creative new assets are needed as we expand levels.</p>
+
+<p><strong>Random Events:</strong> Walking through the forest is boring if nothing ever happens. We need to come up with ideas for random occurrences that happen as players explore our world.</p> 
+
 
 <h3>Authors and Contributors</h3>
 
@@ -63,7 +108,7 @@ $ git checkout gh-pages
     <!-- FOOTER  -->
     <div id="footer_wrap" class="outer">
       <footer class="inner">
-        <p class="copyright">Lord maintained by <a href="https://github.com/django-lord">django-lord</a></p>
+        <p class="copyright">LORD maintained by <a href="https://github.com/django-lord">django-lord</a></p>
         <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>
