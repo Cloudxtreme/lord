@@ -1,7 +1,10 @@
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.utils.timezone import now
 
 from game.models import *
+
+import datetime
 
 class Terrain(DatesMixin):
     name = models.CharField(max_length=20)
@@ -58,13 +61,12 @@ class MapSquare(DatesMixin):
     class Meta:
         ordering = ('world_map', 'x', 'y')
         unique_together = ('world_map', 'x', 'y') # only one X/Y coordinate per map.
+        
+    def active_players(self):
+        return self.player_set.filter(here_since__gt=now()-datetime.timedelta(minutes=10))
     
     def get_surrounding_squares(self):
         return MapSquare.objects.filter(world_map=self.world_map, x__gt=self.x-2, x__lt=self.x+2, y__gt=self.y-2, y__lt=self.y+2)
-        
-    @property
-    def is_passable(self):
-        return self.terrain.passable
         
     def get_possible_moves(self):
         possible_moves = {}
@@ -89,6 +91,10 @@ class MapSquare(DatesMixin):
             pass
             
         return possible_moves
+    
+    @property
+    def is_passable(self):
+        return self.terrain.passable
 
     def __unicode__(self):
         return "{map}/{x}/{y}".format(map=self.world_map, x=self.x, y=self.y)

@@ -45,9 +45,9 @@
 		</form>
 	</div>
 	<div class="other_players">
-		{% if request.user.map_square.player_set.all.count > 1 %}
-			You see {{ request.user.map_square.player_set.all.count|pluralize:"an," }}other adventurer{{ request.user.map_square.player_set.all.count|pluralize:"s" }} nearby...<br/>
-			{% for player in request.user.map_square.player_set.all %}
+		{% if request.user.map_square.active_players.count > 1 %}
+			You see {{ request.user.map_square.active_players.count|pluralize:"an," }}other adventurer{{ request.user.map_square.active_players.count|pluralize:"s" }} nearby...<br/>
+			{% for player in request.user.map_square.active_players %}
 				{% if player.id != request.user.id %}
 					<a href="#{{ player.handle|slugify }}" role="button" data-toggle="modal">{{ player.handle }}</a><br/>
 					
