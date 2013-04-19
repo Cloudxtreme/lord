@@ -59,7 +59,7 @@ API_LIMIT_PER_PAGE = 10
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ['lord.herokuapp.com','lordofthereddragon.com','www.lordofthereddragon.com']
+ALLOWED_HOSTS = ['lord.herokuapp.com','lordofthereddragon.com']
 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3.S3Storage'
 
