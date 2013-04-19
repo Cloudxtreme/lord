@@ -5,11 +5,9 @@ from django.utils.timezone import now
 
 from .models import *
 
+@login_required
 def home(request):
-    if request.user.is_authenticated():
-        return redirect(reverse('world_map_main', kwargs={'world_map_id':request.user.world_map.pk}))
-    else:
-        return redirect(reverse('login'))
+    return redirect(reverse('world_map_main', kwargs={'world_map_id':request.user.world_map.pk}))
 
 @login_required
 def main(request, world_map_id):
