@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render
@@ -16,6 +17,8 @@ def register(request):
         form = PlayerAddForm(request.POST)
         if form.is_valid():
             new_user = form.save()
+            new_user = authenticate(email=form.cleaned_data['email'], password=form.cleaned_data['password'])
+            login(request, new_user)
             return redirect(settings.LOGIN_REDIRECT_URL)
     else:
         form = PlayerAddForm()
