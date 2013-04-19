@@ -51,7 +51,7 @@ class PlayerAdmin(admin.ModelAdmin):
         ('Inventory', {'fields': ('equipped_armor','equipped_weapon','gold','bank','gem')}),
         ('Skills', {'fields': ('death_knight_level','death_knight_skill','mystical_level','mystical_skill','theif_level','theif_skill')}),
         ('Location', {'fields': ('world_map','map_square',)}),
-        ('Permissions', {'fields': ('is_active','is_staff','is_superuser',)}),
+        ('Permissions', {'fields': ('is_active','is_staff','is_superuser','groups',)}),
     )
     add_fieldsets = (
         (None, {

@@ -155,7 +155,7 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
     
     def get_activity_log(self):
         if self.activitylog_to_player.all():
-            self.activitylog_to_player.filter(created_at__lt=(now()-datetime.timedelta(minutes=10)), viewed=True).delete() # purge messages that are older than 10 minutes and have already been seen.
+            #self.activitylog_to_player.filter(created_at__lt=(now()-datetime.timedelta(minutes=10)), viewed=True).delete() # purge messages that are older than 10 minutes and have already been seen.
             self.activitylog_to_player.all().update(viewed=True)
         return self.activitylog_to_player.all().order_by('-id')[:10]
         
@@ -335,9 +335,13 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
 
         return
     
-    def ressurrect(self):
-        self.dead, self.hit_points = 0, self.hit_points_max
+    def nearby_players(self):
+        return self.map_square.player_set.filter(here_since__gt=now()-datetime.timedelta(minutes=10)).exclude(pk=self.pk)
+    
+    def reset(self):
+        self.dead, self.hit_points, self.fights_left, self.human_fights_left, self.seen_bard, self.seen_dragon, self.seen_master, self.seen_violet, self.weird_event, self.done_special, self.flirted = False, self.hit_points_max, self.MAX_FIGHTS, self.MAX_HUMAN_FIGHTS, Player(), False, False, False, False, False, False, False
         self.save()
+        return
         
     @property
     def status(self):

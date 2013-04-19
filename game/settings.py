@@ -41,6 +41,9 @@ LOGIN_REDIRECT_URL = '/world/worldmap/1/main.html'
 LOGIN_URL = 'django.contrib.auth.views.login'
 LOGOUT_URL = 'django.contrib.auth.views.logout'
 
+TASTYPIE_FULL_DEBUG = True
+API_LIMIT_PER_PAGE = 10
+
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = ['lord.herokuapp.com',]
@@ -162,6 +165,7 @@ INSTALLED_APPS = (
     # 3rd Party
     'south',
     'storages',
+    'tastypie',
     
     'players',
     'world',

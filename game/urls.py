@@ -1,14 +1,16 @@
 from django.conf.urls import patterns, include, url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-
-# Uncomment the next two lines to enable the admin:
 from django.contrib import admin
+
+from players.api import ActivityLogResource
+activity_log_resource = ActivityLogResource()
+
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'game.views.home', name='home'),
-    #url(r'^accounts/', include('django.contrib.auth.urls')),
+    # API URLs
+    url(r'^api/', include(activity_log_resource.urls)),
+    
     url(r'^world/', include('world.urls')),
     url(r'^players/', include('players.urls')),
 

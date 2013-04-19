@@ -1,0 +1,4 @@
+		<div id="activity_log_{{ activity.pk }}" class="alert alert-{% if activity.activity_type == 'pvp_attacker' or activity.activity_type == 'pvp_defender' %}error{% else %}info{% endif %}">
+			<strong>{{ activity.created_at|timesince }} ago...</strong>
+			{{ activity.message|linebreaks }}
+		</div>

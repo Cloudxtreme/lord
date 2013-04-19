@@ -1,6 +1,5 @@
 from django.conf.urls import patterns, include, url
 
-# Uncomment the next two lines to enable the admin:
 urlpatterns = patterns('',
     url(r'^attack_player.go$', 'players.views.attack_player', name='players_attack_player'),
     url(r'^login.html$',  'django.contrib.auth.views.login', name="login"),
