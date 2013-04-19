@@ -155,7 +155,7 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
     
     def get_activity_log(self):
         if self.activitylog_to_player.all():
-            #self.activitylog_to_player.filter(created_at__lt=(now()-datetime.timedelta(minutes=10)), viewed=True).delete() # purge messages that are older than 10 minutes and have already been seen.
+            self.activitylog_to_player.filter(created_at__lt=(now()-datetime.timedelta(minutes=10)), viewed=True).delete() # purge messages that are older than 10 minutes and have already been seen.
             self.activitylog_to_player.all().update(viewed=True)
         return self.activitylog_to_player.all().order_by('-id')[:10]
         
