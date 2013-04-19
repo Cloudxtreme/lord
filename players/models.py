@@ -2,8 +2,8 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 from django.utils.timezone import now
 
-from game.models import *
-from world.models import *
+from game.models import DatesMixin
+from world.models import MapSquare, WorldMap
 
 import datetime, random
 
@@ -156,8 +156,9 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
     def get_activity_log(self):
         if self.activitylog_to_player.all():
             self.activitylog_to_player.filter(created_at__lt=(now()-datetime.timedelta(minutes=10)), viewed=True).delete() # purge messages that are older than 10 minutes and have already been seen.
+            self.activitylog_to_player.filter(activity_type__in=['arrival','departure'], viewed=True).delete()
             self.activitylog_to_player.all().update(viewed=True)
-        return self.activitylog_to_player.all().order_by('-id')[:10]
+        return self.activitylog_to_player.all()[:10]
         
     def get_fight_status(self):
         percent_fights_remaining = int((self.fights_left * 1.0 / self.MAX_FIGHTS) * 100)
@@ -307,20 +308,24 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
         
         next_y = current_y = self.map_square.y
         next_x = current_x = self.map_square.x
-        direction_name = ''
+        from_direction_name = direction_name = ''
         
         if direction == 'N':
             next_y -= 1
             direction_name = 'North'
+            from_direction_name = 'South'
         elif direction == 'S':
             next_y += 1
             direction_name = 'South'
+            from_direction_name = 'North'
         elif direction == 'W':
             next_x -= 1
             direction_name = 'West'
+            from_direction_name = 'East'
         elif direction == 'E':
             next_x += 1
             direction_name = 'East'
+            from_direction_name = 'West'
         
         try:
             next_map_square = MapSquare.objects.get(world_map=self.world_map, x=next_x, y=next_y)
@@ -329,6 +334,10 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
             
         if not next_map_square.terrain.passable:
             raise InvalidMoveException("Terrain to the {direction} is not passable.".format(direction=direction_name))
+        
+        # announce move
+        self.map_square.announce_departure(player=self, to_direction=direction_name)
+        next_map_square.announce_arrival(player=self, from_direction=from_direction_name)
         
         self.map_square = next_map_square
         self.here_since = now()
@@ -364,13 +373,18 @@ class ActivityLog(DatesMixin):
     ACTIVITY_TYPES = (
         ('pvp_attacker', 'You attack'),
         ('pvp_defender', 'You were attacked'),
-        ('event', 'An event occurred')
+        ('event', 'An event occurred'),
+        ('arrival', 'A player walked up.'),
+        ('departure', 'A player left.'),
     )
     to_player = models.ForeignKey('Player', related_name='activitylog_to_player')
     from_player = models.ForeignKey('Player', related_name='activitylog_from_player')
     activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPES)
     message = models.TextField()
     viewed = models.BooleanField(default=False)
+    
+    class Meta:
+        ordering = ('-id',)
         
 
 class Armor(DatesMixin):

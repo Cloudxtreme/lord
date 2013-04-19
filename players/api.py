@@ -24,7 +24,7 @@ class ActivityLogResource(ModelResource):
         authorization = ActivityLogAuthorization()
         allowed_methods = ['get',]
         ordering = ['-pk']
-        fields = ['id']
+        fields = ['id','activity_type','from_player','viewed']
         
     def dehydrate(self, bundle):
         bundle.data['html'] = render_to_string('player/activity_log_entry.html', {'activity':bundle.obj}).replace("\t","").replace("\n", "")

@@ -2,7 +2,7 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.timezone import now
 
-from game.models import *
+from game.models import DatesMixin
 
 import datetime
 
@@ -61,6 +61,22 @@ class MapSquare(DatesMixin):
     class Meta:
         ordering = ('world_map', 'x', 'y')
         unique_together = ('world_map', 'x', 'y') # only one X/Y coordinate per map.
+        
+    def announce_arrival(self, player, from_direction):
+        from players.models import ActivityLog
+        activity_logs = []
+        for active_player in self.active_players().exclude(pk=player.pk):
+            activity_logs.append(ActivityLog(to_player=active_player, from_player=player, activity_type='arrival', message="You see {player} walking up from the {from_direction}.".format(player=player.handle, from_direction=from_direction)))
+        ActivityLog.objects.bulk_create(activity_logs)
+        return
+    
+    def announce_departure(self, player, to_direction):
+        from players.models import ActivityLog
+        activity_logs = []
+        for active_player in self.active_players().exclude(pk=player.pk):
+            activity_logs.append(ActivityLog(to_player=active_player, from_player=player, activity_type='departure', message="You see {player} off to the {to_direction}.".format(player=player.handle, to_direction=to_direction)))
+        ActivityLog.objects.bulk_create(activity_logs)
+        return
         
     def active_players(self):
         return self.player_set.filter(here_since__gt=now()-datetime.timedelta(minutes=10))
