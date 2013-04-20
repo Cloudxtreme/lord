@@ -1,4 +1,5 @@
 activity_log_container = $('#activity_log_container');
+other_player_container = $('ul#other-players');
 
 (function poll_activity_log() {
 	setTimeout(function() {
@@ -18,10 +19,19 @@ activity_log_container = $('#activity_log_container');
 function update_activity_log(data) {
 	data.objects.map(function(item) {
 		item_id = '#activity_log_' + item.id;
+		
+		// only run if the activity isn't displayed.
 		if ($(item_id).length == 0) {
-			var new_activity = $(item.html).hide();
+			var new_activity = $(item.activity_html).hide();
 			activity_log_container.prepend(new_activity);
 			new_activity.slideDown();
+			if (item.activity_type == 'arrival') {
+				$('#other-players-blurb').html(item.other_players_blurb);
+				other_player_container.append(item.other_players_html);
+			} else if (item.activity_type == 'departure') {
+				$('#other-players-blurb').html(item.other_players_blurb);
+				$('#oplayer_' + item.from_player).remove();
+			}
 		}
 	});
 }

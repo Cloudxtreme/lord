@@ -1,0 +1,15 @@
+ul#other-players {
+	list-style: none;
+	list-style-type: none;
+	margin:0px;
+	padding:0px;
+}
+ul#other-players li:after { content: ","; }
+ul#other-players li:last-child:after { content: ""; }
+ul#other-players li { 
+	list-style: none;
+	display: inline; 
+}
+
+.other-player-dead { text-decoration:line-through; }
+.td1 { width: 50px; }

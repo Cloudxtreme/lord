@@ -27,5 +27,13 @@ class ActivityLogResource(ModelResource):
         fields = ['id','activity_type','from_player','viewed']
         
     def dehydrate(self, bundle):
-        bundle.data['html'] = render_to_string('player/activity_log_entry.html', {'activity':bundle.obj}).replace("\t","").replace("\n", "")
+        # include full html for activity.
+        bundle.data['activity_html'] = render_to_string('player/activity_log_entry.html', {'activity':bundle.obj}).replace("\t","").replace("\n", "")
+        bundle.data['from_player'] = bundle.obj.from_player.handle
+        
+        # if activity is an arrival or departure, then include html needed to add to the nearby players list interface.
+        if bundle.obj.activity_type in ('arrival','departure'):
+            bundle.data['other_players_blurb'] = render_to_string('player/other_players_blurb.html', {'player':bundle.obj.to_player})
+            if bundle.obj.activity_type == 'arrival':
+                bundle.data['other_players_html'] = render_to_string('player/other_player.html', {'player':bundle.obj.from_player})
         return bundle
