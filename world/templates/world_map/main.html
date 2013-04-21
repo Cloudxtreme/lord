@@ -9,7 +9,7 @@
 
 {% block page_title %}{{ world_map.name }}{% endblock %}
 {% block content %}
-	<div class="map">
+	<div class="map mapwidth">
 		{% if request.user.is_superuser %}<p><a href="{% url 'world_map_edit' world_map_id=world_map.pk %}">edit map</a></p>{% endif %}
 		{% spaceless %}
 		{% for y in world_map.full_map_layout %}

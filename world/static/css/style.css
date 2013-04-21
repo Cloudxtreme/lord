@@ -32,6 +32,12 @@ body {
   }
 }
 
+@media all and (max-width: 480px)  {
+    .mapwidth {
+        width: 480px !important;
+    }
+}
+
 
 
 /* Custom page CSS
