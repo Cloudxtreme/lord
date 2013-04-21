@@ -58,6 +58,17 @@
 	        <div class="page-header">
 	          <h1>{% block page_title %}{% endblock %}</h1>
 	        </div>
+	        <div class="span8">
+			{% if messages %}
+				{% for message in messages %}
+						<div class="alert{% if message.tags %} alert-{{ message.tags }}{% endif %}">
+							<button type="button" class="close" data-dismiss="alert">&times;</button>
+							{{ message|linebreaks }}
+						</div>
+				{% endfor %}
+			{% endif %}
+	        	{% block content %}{% endblock %}
+	        </div>
 	{% if user.is_authenticated %}
 			<div id="player-stats" class="span3 pull-right">
 				<h3>{% now "P" %}</h3>
@@ -94,17 +105,6 @@
 				
 			</div>
 	{% endif %}
-	        <div class="span8">
-			{% if messages %}
-				{% for message in messages %}
-						<div class="alert{% if message.tags %} alert-{{ message.tags }}{% endif %}">
-							<button type="button" class="close" data-dismiss="alert">&times;</button>
-							{{ message|linebreaks }}
-						</div>
-				{% endfor %}
-			{% endif %}
-	        	{% block content %}{% endblock %}
-	        </div>
 	      </div>
 
 	      <div id="push"></div>

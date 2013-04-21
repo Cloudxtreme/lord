@@ -36,6 +36,9 @@ body {
     .mapwidth {
         width: 480px !important;
     }
+    .container {
+    	padding-top: 0px !important;
+    }
 }
 
 
