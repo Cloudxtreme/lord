@@ -31,6 +31,9 @@ function update_activity_log(data) {
 			} else if (item.activity_type == 'departure') {
 				$('#other-players-blurb').html(item.other_players_blurb);
 				$('#oplayer_' + item.from_player).remove();
+			} else if (item.activity_type == 'pvp_defender' || item.activity_type == 'pvp_attacker') {
+				$('#my_hitpoints').css('width', item.percent_hp_remaining + '%');
+				$('#my_hitpoints').parent().removeClass().addClass('progress progress-striped progress-' + item.hp_class);
 			}
 		}
 	});

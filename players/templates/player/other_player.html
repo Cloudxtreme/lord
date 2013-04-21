@@ -1,1 +1,1 @@
-<li id="oplayer_{{ player.handle|slugify }}"><a href="#{{ player.handle|slugify }}" role="button" data-toggle="modal" class="other-player{% if player.dead %}-dead {% endif %}">{{ player.handle }}</a></li>
+<li id="oplayer_{{ player.handle|slugify }}"><a href="{% url 'player_detail' player %}" role="button" data-toggle="modal" data-target="#other-player-modal" class="other-player{% if player.dead %}-dead {% endif %}">{{ player.handle }}</a></li>

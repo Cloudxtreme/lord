@@ -66,7 +66,7 @@ class MapSquare(DatesMixin):
         from players.models import ActivityLog
         activity_logs = []
         for active_player in self.active_players().exclude(pk=player.pk):
-            activity_logs.append(ActivityLog(to_player=active_player, from_player=player, activity_type='arrival', message="You see {player} walking up from the {from_direction}.".format(player=player.handle, from_direction=from_direction)))
+            activity_logs.append(ActivityLog(to_player=active_player, from_player=player, activity_type='arrival', message="You see {player} appear from the {from_direction}.".format(player=player.handle, from_direction=from_direction)))
         ActivityLog.objects.bulk_create(activity_logs)
         return
     
@@ -74,7 +74,7 @@ class MapSquare(DatesMixin):
         from players.models import ActivityLog
         activity_logs = []
         for active_player in self.active_players().exclude(pk=player.pk):
-            activity_logs.append(ActivityLog(to_player=active_player, from_player=player, activity_type='departure', message="You see {player} head off to the {to_direction}.".format(player=player.handle, to_direction=to_direction)))
+            activity_logs.append(ActivityLog(to_player=active_player, from_player=player, activity_type='departure', message="You see {player} wander off to the {to_direction}.".format(player=player.handle, to_direction=to_direction)))
         ActivityLog.objects.bulk_create(activity_logs)
         return
         

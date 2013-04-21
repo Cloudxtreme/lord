@@ -139,6 +139,10 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'handle', 'gender']
     
+    def get_pronoun(self):
+        if self.gender == 'M': return 'He' 
+        else: return 'She'
+    
     def get_full_name(self):
         # The user is identified by their handle.
         return self.handle
@@ -194,7 +198,7 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
             raise InvalidAttackException("You quickly realize that you would unfairly destroy {defender} in a match and walk away.".format(defender=defender.handle))
 
         if defender.strength - self.strength > 50 or defender.level - self.level > 5:
-            raise InvalidAttackException("{defender} looks at you. (S)he scoffs and walks away.".format(defender=defender.handle))
+            raise InvalidAttackException("{defender} looks at you. {pronoun} scoffs and walks away.".format(defender=defender.handle, pronoun=defender.get_pronoun()))
         
         # reset the online counter.
         self.here_since = now()
@@ -255,6 +259,7 @@ class Player(AbstractBaseUser, PermissionsMixin, DatesMixin):
             damage = defender.deal_damage(self)
             if damage == 0:
                 attacker_fight_description += "You skillfully block {defender}'s attack.\n".format(defender=defender.handle)
+                defender_fight_description += "{attacker} skillfully blocks your attack.\n".format(attacker=attacker.handle)
             elif self.dead:
                 attacker_fight_description += "{defender} attacks you with a deadly blow.  You die.\n".format(defender=defender.handle)
                 defender_fight_description += "You deal a deadly blow to {attacker}.  He dies and you loot his body.  You find {gold} gold and {gem} gems!\n".format(attacker=self.handle, gold=self.gold, gem=self.gem)

@@ -68,3 +68,8 @@ def attack_player(request):
         messages.error(request, e)
         
     return redirect(return_url)
+
+@login_required
+def player_detail(request, player_handle):
+    player = Player.objects.get(handle=player_handle)
+    return render(request, 'player/detail.html', {'player':player})

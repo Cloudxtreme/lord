@@ -63,7 +63,7 @@
 				<h3>{% now "P" %}</h3>
 				{% with request.user.get_hp_status as hp_status %}
 					<div class="progress progress-{{ hp_status.0 }} progress-striped">
-					  <div class="bar" style="width: {{ hp_status.1 }}%">Hit Points: {{ request.user.hit_points }} / {{ request.user.hit_points_max }}</div>
+					  <div id="my_hitpoints" class="bar" style="width: {{ hp_status.1 }}%">Hit Points: {{ request.user.hit_points }} / {{ request.user.hit_points_max }}</div>
 					</div>
 				{% endwith %}
 				{% with request.user.get_fight_status as fight_status %}

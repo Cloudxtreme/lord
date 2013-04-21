@@ -31,8 +31,14 @@ class ActivityLogResource(ModelResource):
         bundle.data['activity_html'] = render_to_string('player/activity_log_entry.html', {'activity':bundle.obj}).replace("\t","").replace("\n", "")
         bundle.data['from_player'] = bundle.obj.from_player.handle
         
+        # include hp if activity is a fight.
+        if bundle.obj.activity_type in ('pvp_attacker', 'pvp_defender'):
+            bundle.data['hit_points'] = bundle.obj.to_player.hit_points
+            bundle.data['hp_class'], bundle.data['percent_hp_remaining'] = bundle.obj.to_player.get_hp_status()
+            
+        
         # if activity is an arrival or departure, then include html needed to add to the nearby players list interface.
-        if bundle.obj.activity_type in ('arrival','departure'):
+        elif bundle.obj.activity_type in ('arrival','departure'):
             bundle.data['other_players_blurb'] = render_to_string('player/other_players_blurb.html', {'player':bundle.obj.to_player})
             if bundle.obj.activity_type == 'arrival':
                 bundle.data['other_players_html'] = render_to_string('player/other_player.html', {'player':bundle.obj.from_player})
